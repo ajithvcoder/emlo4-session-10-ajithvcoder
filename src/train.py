@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import logging
 import comet_ml
+import copy
 
 import hydra
 import torch
@@ -21,14 +22,48 @@ from src.utils.logging_utils import setup_logger, task_wrapper
 log = logging.getLogger(__name__)
 load_dotenv("../.env")
 
+# class CustomModelCheckpiont(ModelCheckpoint):
+#     def _save_checkpoint(self, trainer, filepath):
+#         trainer.lightning_module.save_transformed_model = True
+#         filepath = filepath.split(".ckpt")[0]
+#         filepath = f"{filepath}_patch_size-{trainer.model.patch_size}_embed_dim-{trainer.model.embed_dim}.ckpt"
+#         print(f"File saved to {filepath}")
+#         # Export the model to TorchScript (use tracing or scripting)
+#         example_input = torch.randn(1, 3, 224, 224)  # Example input for tracing
+#         model_torch = copy.deepcopy(trainer.model)
+#         torchscript_model = model_torch.to_torchscript(method="trace", example_inputs=example_input)
+
+#         # Save the TorchScript model
+#         torchscript_path = filepath.split(".ckpt")[0] + ".pt"
+#         torch.jit.save(torchscript_model, torchscript_path)
+
+#         print(f"TorchScript model saved to {torchscript_path}")
+#         super()._save_checkpoint(trainer, filepath)
+#         # print(filepath)
+
 class CustomModelCheckpiont(ModelCheckpoint):
     def _save_checkpoint(self, trainer, filepath):
-        trainer.lightning_module.save_transformed_model = True
-        filepath = filepath.split(".ckpt")[0]
-        filepath = f"{filepath}_patch_size-{trainer.model.patch_size}_embed_dim-{trainer.model.embed_dim}.ckpt"
-        print(f"File saved to {filepath}")
+        # Modify filepath for custom checkpoint naming
+        base_filepath = filepath.split(".ckpt")[0]
+        filepath = f"{base_filepath}_patch_size-{trainer.model.patch_size}_embed_dim-{trainer.model.embed_dim}.ckpt"
+        print(f"Checkpoint filepath: {filepath}")
+
+        # Save PyTorch Lightning checkpoint
         super()._save_checkpoint(trainer, filepath)
-        # print(filepath)
+
+        # Export the model to TorchScript
+        example_input = torch.randn(1, 3, 224, 224)  # Example input for tracing
+        try:
+            # model_torch = copy.deepcopy(trainer.model)
+            torchscript_model = model_torch.to_torchscript(method="trace", example_inputs=example_input)
+
+            # Save the TorchScript model
+            torchscript_path = filepath.replace(".ckpt", ".pt")
+            torch.jit.save(torchscript_model, torchscript_path)
+            print(f"TorchScript model saved to {torchscript_path}")
+        except Exception as e:
+            print(f"Failed to save TorchScript model: {e}")
+
 
 
 def instantiate_callbacks(callback_cfg: DictConfig) -> List[L.Callback]:

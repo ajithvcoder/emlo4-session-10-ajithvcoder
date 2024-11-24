@@ -4,3 +4,4 @@ model_storage*
 *__pycache__*
 logs/*
 credentials.json
+./demo/model_storage/*

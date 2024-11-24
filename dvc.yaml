@@ -17,3 +17,6 @@ stages:
     deps:
     - configs/experiment/catdog_ex.yaml
     - src/infer.py
+  code-test-coverage:
+    cmd: pytest --cov-report term --cov=src/ tests/
+
