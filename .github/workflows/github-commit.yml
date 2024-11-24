@@ -1,0 +1,182 @@
+name: Github-Commit-Transfer
+on: 
+  workflow_dispatch:
+jobs:
+  # Note this workflow is just to test if i am able to fetch github commit id from one job to another
+  build-and-push-ecr-image:
+    name: Build and push ECR image
+    runs-on: ubuntu-latest
+    outputs:
+      commit_id: ${{ steps.get_commit_id.outputs.commit_id }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Get latest commit ID
+        id: get_commit_id
+        run: |
+          latest_commit=$(git rev-parse HEAD)
+          echo "::set-output name=commit_id::$latest_commit"
+
+
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ steps.get_commit_id.outputs.commit_id }}"
+          
+
+  launch-runner:
+    runs-on: ubuntu-latest
+    needs: build-and-push-ecr-image
+    outputs:
+      commit_id: ${{ steps.get_commit_id_runner.outputs.commit_id }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: iterative/setup-cml@v2
+
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ needs.build-and-push-ecr-image.outputs.commit_id }}"
+
+      - name: Get latest commit ID
+        id: get_commit_id_runner
+        run: |
+          echo "::set-output name=commit_id::${{ needs.build-and-push-ecr-image.outputs.commit_id }}"
+
+
+  EC2-runner:
+    runs-on: ubuntu-latest
+    needs: launch-runner
+    outputs:
+      commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: iterative/setup-cml@v2
+
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ needs.launch-runner.outputs.commit_id }}"
+
+      - name: Get latest commit ID
+        id: get_commit_id_ec2
+        run: |
+          echo "::set-output name=commit_id::${{ needs.launch-runner.outputs.commit_id }}"
+
+
+      # - name: Deploy runner on AWS EC2 
+      #   env:
+      #     REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #   run: |
+      #     cml runner launch \
+      #     --cloud=aws \
+      #     --name=session-08 \
+      #     --cloud-region=ap-south-1 \
+      #     --cloud-type=g4dn.xlarge \
+      #     --cloud-hdd-size=64 \
+      #     --cloud-spot \
+      #     --single \
+      #     --labels=cml-gpu \
+      #     --idle-timeout=100 
+  # train-and-report:
+  #   runs-on: [self-hosted, cml-gpu]
+  #   needs: launch-runner
+  #   timeout-minutes: 20
+  #   # container:
+  #   #   image: docker://pytorch/pytorch:2.4.0-cuda12.4-cudnn9-runtime
+  #   #   options: --gpus all
+  #   # runs-on: ubuntu-latest
+  #   steps:
+
+  #     - name: Verify EC2 Instance
+  #       run: |
+  #         echo "Checking instance information..."
+  #         # Check if we're on EC2
+  #         TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  #         curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-type
+          
+  #         echo "Checking system resources..."
+  #         lscpu
+  #         free -h
+  #         df -h
+  #         nvidia-smi  # This will show GPU if available
+          
+  #         echo "Checking environment..."
+  #         env | grep AWS || true
+  #         hostname
+  #         whoami
+  #         pwd
+  #         # Install the AWS CLI if not already available
+  #         if ! command -v aws &> /dev/null; then
+  #           apt-get update
+  #           apt-get install -y awscli
+  #         fi
+          
+  #         # Get ECR login command and execute it
+  #         $(aws ecr get-login --no-include-email --region ap-south-1)
+  #         aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 306093656765.dkr.ecr.ap-south-1.amazonaws.com
+
+  #     - name: Set up AWS CLI credentials
+  #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         AWS_DEFAULT_REGION: ap-south-1  # Change to your desired region
+  #       run: |
+  #         # Create the AWS config and credentials files
+  #         mkdir -p ~/.aws
+  #         echo "[default]" > ~/.aws/config
+  #         echo "region=${AWS_DEFAULT_REGION}" >> ~/.aws/config
+  #         echo "[default]" > ~/.aws/credentials
+  #         echo "aws_access_key_id=${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
+  #         echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
+
+  #     - name: Test AWS CLI
+  #       run: |
+  #         # Now you can run any AWS CLI command
+  #         aws s3 ls  # Example command to list S3 buckets
+
+  #     - name: Install jq
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y jq
+
+
+  #     - name: Read best checkpoint file name
+  #       id: read_checkpoint
+  #       run: |
+  #         mkdir -p model_storage
+  #         touch model_storage/checkpoint_test.txt
+  #         echo "CHECKPOINT_FILE=model_storage/checkpoint_test.txt" >> $GITHUB_ENV
+  #         # checkpoint_file=$(head -n 1 ./model_storage/best_model_checkpoint.txt)
+  #         # echo "CHECKPOINT_FILE=$checkpoint_file" >> $GITHUB_ENV
+
+  #     - name: Display the commit ID
+  #       run: |
+  #         echo "Latest commit ID is: ${{ needs.outputs.commit_id }}"
+
+  #     - name: Upload checkpoint to S3
+  #       run: |
+  #         checkpoint_path="${{ env.CHECKPOINT_FILE }}"  # Use the checkpoint path from the file
+  #         bucket_name="mybucket-emlo-mumbai"  # Change to your S3 bucket name
+  #         s3_key="session-08-checkpoint/${{ needs.outputs.commit_id }}/$(basename "$checkpoint_path")"  # Define S3 key
+  #         echo "Uploading $checkpoint_path to s3://$bucket_name/$s3_key"
+  #         aws s3 cp "$checkpoint_path" "s3://$bucket_name/$s3_key"
+
+  #     - name: Clean previous images and containers
+  #       run: |
+  #         docker system prune -f

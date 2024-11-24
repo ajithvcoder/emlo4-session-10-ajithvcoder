@@ -1,0 +1,6 @@
+_target_: src.datamodules.dogbreed_modules.DogBreedImageDataModule
+
+dl_path: ${paths.data_dir}/dataset/val
+num_workers: 0
+samples: 5
+

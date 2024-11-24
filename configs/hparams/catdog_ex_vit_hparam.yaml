@@ -1,0 +1,49 @@
+# @package _global_
+
+defaults:
+  - override /hydra/sweeper: optuna
+  # - override /hydra/launcher: optuna
+
+# We want to optimize for the highest test accuracy
+optimization_metric: "val_acc"
+
+# Override the experiment name
+experiment_name: "catdog_vit_hparam_optimization"
+
+hydra:
+  sweeper:
+    sampler:
+      _target_: optuna.samplers.TPESampler
+      seed: 123
+      n_startup_trials: 3
+    direction: maximize
+    study_name: catdog_vit_hparam_optimization
+    storage: null
+    n_trials: 2
+    n_jobs: 4
+
+    # Define the hyperparameters to optimize
+    params:
+        model.patch_size: choice(8, 16, 32)
+        model.embed_dim: choice(64, 96, 128)
+    # model.num_heads: choice(2, 4, 8)
+    # model.mlp_ratio: interval(2.0, 4.0)
+  
+
+# Other configurations
+data:
+  batch_size: 128
+
+model:
+  base_model: 'convnext_tiny'
+  pretrained: False
+  patch_size: 16
+  embed_dim: 128
+  depth: 6
+  num_heads: 8
+  mlp_ratio: 3
+  lr: 1e-3
+
+trainer:
+  min_epochs: 1
+  max_epochs: 2

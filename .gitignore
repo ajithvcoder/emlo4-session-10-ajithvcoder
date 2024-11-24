@@ -1,0 +1,6 @@
+/data
+.aim
+model_storage*
+*__pycache__*
+logs/*
+credentials.json

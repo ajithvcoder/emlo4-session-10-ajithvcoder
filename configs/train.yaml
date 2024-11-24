@@ -1,0 +1,24 @@
+
+# TODO: Check if logger can be enabled
+
+defaults:
+  - _self_
+  - data: catdog
+  - model: cat_dog_classsifer
+  - logger: default
+  - paths: default
+  - trainer: default
+  - callbacks: default
+  - hydra: default
+  - hparams: catdog_ex_vit_hparam
+
+  - experiment: catdog_ex
+
+  - debug: null
+
+task_name: "train"
+tags: ["dev"]
+train: true
+test: true
+ckpt_path: null
+seed: null

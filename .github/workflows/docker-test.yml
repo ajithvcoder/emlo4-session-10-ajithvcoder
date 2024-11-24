@@ -1,0 +1,114 @@
+name: ML Training and artifact generation Workflow with DHCR
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_accuracy:
+        description: 'Minimum required accuracy'
+        required: true
+        default: '0.95'
+        type: string
+      docker_image:
+        description: 'Minimum required accuracy'
+        default: ghcr.io/ajithvcoder/emlo4-session-05-ajithvcoder:latest
+        type: string
+
+  workflow_call:
+    inputs:
+      min_accuracy:
+        description: 'Minimum required accuracy'
+        required: true
+        default: '0.95'
+        type: string
+      docker_image:
+        description: 'Minimum required accuracy'
+        required: false
+        default: 'ghcr.io/ajithvcoder/emlo4-session-05-ajithvcoder:latest'
+        type: string
+
+permissions:        # Define permissions for this workflow
+  packages: write   # Allow writing to packages
+  contents: read    # Allow reading repository contents
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  train_and_create_artifacts:
+    runs-on: ubuntu-latest
+    permissions:
+          contents: read
+          packages: write
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to the Container registry
+      uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Debug Docker Image Input
+      run: echo "docker image - ${{ inputs.docker_image }}"
+
+    - name: Pull DHCR Image
+      run: docker pull ${{ inputs.docker_image }}
+
+    - name: Run training in DHCR container
+      run: |
+        output=$(docker run --rm \
+          -v ${PWD}:/workspace \
+          ${{ inputs.docker_image }} \
+          bash -c "python src/train.py --config-name=train experiment=catdog_ex trainer.max_epochs=5")
+        
+        echo "$output"
+
+        # Extract accuracy and compare with threshold
+        val_acc=$(echo "$output" | grep -o "'val_acc': tensor([0-9.]*)" | grep -o "[0-9.]*")
+        echo "Validation accuracy: $val_acc"
+
+        # Compare accuracy with minimum required
+        min_acc=${{ inputs.min_accuracy }}
+        if (( $(echo "$val_acc < $min_acc" | bc -l) )); then
+          echo "::error::Validation accuracy ($val_acc) is below the required threshold ($min_acc)"
+          exit 1
+        fi
+        
+        echo "val_accuracy=$val_acc" >> $GITHUB_OUTPUT
+
+    - name: Fix permissions
+      run: |
+        sudo chown -R $USER:$USER model_storage logs configs
+    - name: Upload model checkpoint
+      uses: actions/upload-artifact@v3
+      with:
+        name: model-checkpoint
+        path: model_storage/
+        retention-days: 20
+
+    - name: Upload training logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: training-logs
+        path: logs/
+        retention-days: 20
+
+    - name: Upload config
+      uses: actions/upload-artifact@v3
+      with:
+        name: all-config
+        path: configs/
+        retention-days: 20

@@ -1,0 +1,15 @@
+_target_: src.models.dogbreed_classifer.DogBreedClassifier
+
+# Model parameters
+base_model: mobilenetv3
+num_classes: 10
+# pretrained: true
+
+# Optimizer parameters
+lr: 1e-3
+# weight_decay: 1e-5
+
+# Scheduler parameters
+# factor: 0.1
+# patience: 10
+# min_lr: 1e-6

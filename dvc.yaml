@@ -1,0 +1,19 @@
+stages:
+  train:
+    cmd: python src/train.py --multirun --config-name=train experiment=catdog_ex trainer.max_epochs=3
+    deps:
+    - configs/experiment/catdog_ex.yaml
+    - data/cats_and_dogs_filtered
+    - src/train.py
+  report_generation:
+    cmd: python scripts/multirun_metrics_fetch.py
+  test:
+    cmd: python src/eval.py --config-name=eval experiment=catdog_ex
+    deps:
+    - configs/experiment/catdog_ex.yaml
+    - src/eval.py
+  infer:
+    cmd: python src/infer.py --config-name=infer experiment=catdog_ex
+    deps:
+    - configs/experiment/catdog_ex.yaml
+    - src/infer.py

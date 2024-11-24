@@ -1,0 +1,32 @@
+# .github/workflows/ci-pipeline.yml
+
+name: CI Pipeline
+
+on:
+  workflow_dispatch:
+
+# on:
+#   push:
+#     branches:
+#       - main  # Triggers the workflow on push to the main branch
+
+permissions:        # Define permissions for this workflow
+  packages: write   # Allow writing to packages
+  contents: read    # Allow reading repository contents
+
+jobs:
+  data-setup:
+    uses: ./.github/workflows/dvc-pipeline.yml
+    secrets: inherit  # If you need to pass secrets to the build workflow
+
+  # build:
+  #   uses: ./.github/workflows/docker-build.yml
+  #   secrets: inherit  # If you need to pass secrets to the build workflow
+
+  # test:
+  #   uses: ./.github/workflows/docker-test.yml
+  #   needs: build  # This ensures that the test job runs after the build job
+  #   secrets: inherit  # If you need to pass secrets to the test workflow
+  #   with:
+  #       min_accuracy: '0.95'  # Provide the input value here
+  #       docker_image: 'ghcr.io/ajithvcoder/emlo4-session-05-ajithvcoder:latest'

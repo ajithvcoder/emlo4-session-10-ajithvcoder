@@ -1,0 +1,65 @@
+name: New-CML-EC2-Runner
+on: 
+  workflow_dispatch:
+
+jobs:
+    start-runner:
+        timeout-minutes: 5                  # normally it only takes 1-2 minutes
+        name: Start self-hosted EC2 runner   
+        runs-on: ubuntu-latest
+        permissions:
+          actions: write        
+        steps:      
+          - name: Start EC2 runner
+            id: start-ec2-runner
+            uses: NextChapterSoftware/ec2-action-builder@v1.10
+            with:
+              aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws_iam_role_arn: "arn:aws:iam::306093656765:role/github-runner-role"
+              aws_region: "ap-south-1"
+              github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+              github_action_runner_version: v2.300.2                  # Optional (default is latest release)
+              # github_action_runner_extra_cli_args: "--disableupdate"  # Extra cli args for runner startup command
+              github_job_start_ttl_seconds: 60                        # Optional - (defaults to 0 disabling this feature)
+              github_api_retry_delay: 10                              # Optional - Delay when polling for runner registration (default is 10 seconds)
+              ec2_instance_type: g4dn.xlarge
+              ec2_ami_id: ami-06bf4022fa9e0886f
+              ec2_root_disk_size_gb: "64"                 # Optional - (defaults to AMI settings)
+              # ec2_root_disk_ebs_class: "gp3"               # Optional - Only used with custom volume root size (defaults to gp2)
+              ec2_subnet_id: "subnet-0bd682e0d0c12e92c"
+              ec2_security_group_id: "sg-0670dbbbe310e8f04"
+              ec2_instance_ttl: 1                          # Optional - (default is 60 minutes)
+              ec2_spot_instance_strategy: SpotOnly    # Other options are: None, BestEffort, MaxPerformance 
+              ec2_instance_tags: >                          # Required for IAM role resource permission scoping
+                [
+                    {"Key": "Owner", "Value": "ajith1"}
+                ]
+
+    # Job that runs on the self-hosted runner 
+    run-build:
+        timeout-minutes: 1
+        needs:
+          - start-runner
+        runs-on: ${{ github.run_id }}          
+        steps:              
+          - run: env
+
+          - name: Verify EC2 Instance
+            run: |
+              echo "Checking instance information..."
+              # Check if we're on EC2
+              TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+              curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-type
+              
+              echo "Checking system resources..."
+              lscpu
+              free -h
+              df -h
+              nvidia-smi  # This will show GPU if available
+              
+              echo "Checking environment..."
+              env | grep AWS || true
+              hostname
+              whoami
+              pwd
