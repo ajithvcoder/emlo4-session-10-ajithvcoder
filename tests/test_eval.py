@@ -4,6 +4,7 @@ import re
 import hydra
 from pathlib import Path
 import rootutils
+import os
 
 # Setup root directory
 root = rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -15,12 +16,31 @@ from datetime import datetime
 import time
 
 
+# @pytest.fixture
+# def config():
+#     with hydra.initialize(version_base=None, config_path="../configs"):
+#         cfg = hydra.compose(
+#             config_name="eval",
+#             overrides=["experiment=catdog_ex"],
+#         )
+#         return cfg
 @pytest.fixture
 def config():
     with hydra.initialize(version_base=None, config_path="../configs"):
+        # Define the path to the checkpoint file and folder containing .ckpt files
+        checkpoint_file = 'model_storage/best_model_checkpoint.txt'
+        checkpoint_folder = 'model_storage'
+
+        # Read the first line of the checkpoint file to get the file to keep
+        with open(checkpoint_file, 'r') as f:
+            keep_file = f.readline().strip()
+
+        # Get the full path of the file to keep
+        keep_file_path = os.path.join(checkpoint_folder, os.path.basename(keep_file))
+        
         cfg = hydra.compose(
             config_name="eval",
-            overrides=["experiment=dogbreed_ex"],
+            # overrides=[f"callbacks.model_checkpoint.filename=/workspace/{keep_file_path}"],
         )
         return cfg
 
@@ -54,7 +74,7 @@ def caplog(caplog):
 
 @pytest.mark.dependency(on=['tests/test_train.py'])
 @pytest.mark.order(2)
-def test_dogbreed_ex_eval(config, tmp_path, caplog):
+def test_ex_eval(config, tmp_path, caplog):
     # Update output and log directories to use temporary path
     config.paths.output_dir = str(tmp_path)
     config.paths.log_dir = str(tmp_path / "logs")

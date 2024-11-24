@@ -1,8 +1,25 @@
 ## EMLOV4-Session-10 Assignment - (Under development)
 
+https://drive.google.com/file/d/1V4awkaDGr8s1aI3VGoQUs1Ao6aF8_Os3/view?usp=sharing
 
 
+docker build -t light_train_test -f ./Dockerfile .
 
+docker run --gpus=all -d -v /home/ubuntu/devc/emlo4-session-10-ajithvcoder:/workspace/ light_train_test
+
+docker exec -it <c511d4e6ed1a9ca6933c67f02632a2> /bin/bash
+
+Order in which tests are run (eval should run after train)
+
+Packages like pytest-order and pytest-dependency are used for readability and ordering
+Command: pytest --collect-only -v
+Overall Test Coverage Command
+
+pytest --cov-report term --cov=src/ tests/
+Individual Module Test Command
+
+pytest --cov-report term --cov=src/models/ tests/models/test_classifier.py
+pytest --cov-report term --cov=src/data_modules/ tests/models/test_datamodules.py  
 
 ### Contents
 

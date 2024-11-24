@@ -9,9 +9,9 @@ stages:
       size: 1215
     - path: data/cats_and_dogs_filtered
       hash: md5
-      md5: c57d92307d2679437e80f6682cfaf521.dir
-      size: 68556176
-      nfiles: 3000
+      md5: db5ca6baa4721aafd84c3d089b81dd4e.dir
+      size: 68556316
+      nfiles: 3001
     - path: src/train.py
       hash: md5
       md5: 3e411636e7a0263ae80545bdb5e9413d

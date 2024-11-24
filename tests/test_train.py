@@ -20,7 +20,7 @@ def config():
     with hydra.initialize(version_base=None, config_path="../configs"):
         cfg = hydra.compose(
             config_name="train",
-            overrides=["experiment=dogbreed_ex_train","trainer.max_epochs=3"],
+            overrides=["experiment=catdog_ex","trainer.max_epochs=3"],
         )
         return cfg
 
@@ -51,7 +51,7 @@ def caplog(caplog):
     return caplog
 
 @pytest.mark.order(1)
-def test_dogbreed_ex_training(config, tmp_path, caplog):
+def test_ex_training(config, tmp_path, caplog):
     # Update output and log directories to use temporary path
     config.paths.output_dir = str(tmp_path)
     config.paths.log_dir = str(tmp_path / "logs")

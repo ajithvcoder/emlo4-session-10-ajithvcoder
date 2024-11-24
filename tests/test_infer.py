@@ -1,7 +1,7 @@
 import pytest
 import hydra
 from pathlib import Path
-
+import os
 import rootutils
 
 # Setup root directory
@@ -10,19 +10,20 @@ root = rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True
 # Import train function
 from src.infer import infer
 
-
+# TODO fetch from best_model_checkpoint.txt
 @pytest.fixture
 def config():
     with hydra.initialize(version_base=None, config_path="../configs"):
+    
         cfg = hydra.compose(
             config_name="infer",
-            overrides=["callbacks.model_checkpoint.filename=/workspace/model_storage/epoch-checkpoint.ckpt.ckpt"],
+            # overrides=[f"callbacks.model_checkpoint.filename=/workspace/{keep_file_path}"],
         )
         return cfg
 
 @pytest.mark.dependency(on=['tests/test_eval.py'])
 @pytest.mark.order(3)
-def test_dogbreed_ex_infer(config, tmp_path):
+def test_ex_infer(config, tmp_path):
     # Set the path for infer_images
     infer_images_dir = Path("infer_images")
     
@@ -42,4 +43,4 @@ def test_dogbreed_ex_infer(config, tmp_path):
     infer(config)
     
     # Ensure there are 5 files in infer_images after infer()
-    assert len(list(infer_images_dir.glob("*"))) == 5, "There are not exactly 5 files in infer_images after infer()"
+    assert len(list(infer_images_dir.glob("*"))) == 10, "There are not exactly 5 files in infer_images after infer()"

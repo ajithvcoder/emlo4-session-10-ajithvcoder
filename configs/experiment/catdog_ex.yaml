@@ -56,7 +56,7 @@ callbacks:
 optimization_metric: "test_acc"
 
 eval:
-  checkpoint_path_file: best_model_checkpoint.txt
+  checkpoint_path_file: model_storage/best_model_checkpoint.txt
 
 infer:
-  checkpoint_path_file: best_model_checkpoint.txt
+  checkpoint_path_file: model_storage/best_model_checkpoint.txt

@@ -1,4 +1,5 @@
 FROM pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
+# Note: My cml launcher is getting only 11.4 instance so i used above
 
 WORKDIR /workspace
 COPY . .
