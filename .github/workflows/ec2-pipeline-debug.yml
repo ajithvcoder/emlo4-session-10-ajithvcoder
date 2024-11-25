@@ -102,7 +102,7 @@ jobs:
 
       - name: Verify EC2 Instance
         run: |
-          apt update && apt upgrade -y && apt install -y build-essential curl wget git vim unzip awscli zip tar software-properties-common ca-certificates apt-transport-https gnupg lsb-release
+          apt update && apt upgrade -y && apt install -y build-essential curl wget git vim unzip awscli zip tar apt-transport-https gnupg lsb-release
 
           echo "Checking instance information..."
           # Check if we're on EC2
