@@ -3,3 +3,4 @@ gradio
 torch==2.4.1+cpu
 torchvision==0.19.1+cpu
 pillow==11.0.0
+huggingface_hub==0.26.2
