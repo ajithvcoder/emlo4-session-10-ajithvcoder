@@ -176,7 +176,7 @@ def main_run():
         f.write(hparams_content)
     
     with open('best_model_checkpoint.txt', 'w') as f:
-        f.write(f"./model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.ckpt \n")
+        f.write(f"./model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.ckpt\n")
         f.write(f"./model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.pt")
 
     import shutil
@@ -216,7 +216,7 @@ def main_run():
             os.remove(file_path)
             print(f"Removed: {file_path}")
 
-    print(f"Kept: \n{keep_file_path_ckpt} \n{keep_file_path_pt} ")
+    print(f"Kept: \n{keep_file_path_ckpt}\n{keep_file_path_pt} ")
 
     # For gradio deoployment
     # Remove all files in demo/model_storage
