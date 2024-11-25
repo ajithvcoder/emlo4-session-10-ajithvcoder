@@ -41,6 +41,7 @@ def get_metrics(log_dir, timestamp, mode):
     for run in os.listdir(metrics_dir):
         metrics_file = os.path.join(metrics_dir, run, "csv", "version_0", 'metrics.csv')
         if os.path.exists(metrics_file):
+            print(metrics_file)
             metrics_csv_dict[int(run)] = read_csv_to_dict(metrics_file)
     return metrics_csv_dict
 
@@ -75,7 +76,7 @@ def main_run():
     assert list(train_metrics.keys()).sort() == list(hyperparams.keys()).sort()
 
     data = [["Exp No"]]
-    # print(train_metrics)
+    print(train_metrics)
     metrics_keys = train_metrics[0].keys()
     hyperparams_keys = hyperparams[0].keys()
     data[0].extend(metrics_keys)

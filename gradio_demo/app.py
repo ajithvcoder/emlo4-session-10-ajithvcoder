@@ -12,6 +12,7 @@ class CatDogClassifierGradio:
         self.model = self.model.to(self.device)
         self.model.eval()
         # test comment
+        # test comment 2
 
         # Define the same transforms used during training/testing
         self.transform = transforms.Compose([

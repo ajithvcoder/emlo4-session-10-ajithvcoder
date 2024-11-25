@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   train:
-    cmd: python src/train.py --multirun --config-name=train experiment=catdog_ex trainer.max_epochs=2
+    cmd: python src/train.py --multirun --config-name=train experiment=catdog_ex trainer.max_epochs=3
     deps:
     - path: configs/experiment/catdog_ex.yaml
       hash: md5
@@ -23,8 +23,8 @@ stages:
     deps:
     - path: configs/experiment/catdog_ex.yaml
       hash: md5
-      md5: 959c64c29a91c7f7b4448e0c5cbc54f1
-      size: 1215
+      md5: d82b5d6fb9758f53546f97bda014f6f2
+      size: 1243
     - path: src/eval.py
       hash: md5
       md5: 47a9e50a0213ee71ff67a97b71d1ca6e
@@ -34,9 +34,11 @@ stages:
     deps:
     - path: configs/experiment/catdog_ex.yaml
       hash: md5
-      md5: 959c64c29a91c7f7b4448e0c5cbc54f1
-      size: 1215
+      md5: d82b5d6fb9758f53546f97bda014f6f2
+      size: 1243
     - path: src/infer.py
       hash: md5
       md5: 1b360e17f7740c9bd6eba9c52e0dc5d2
       size: 4717
+  code-test-coverage:
+    cmd: pytest --cov-report term --cov=src/ tests/

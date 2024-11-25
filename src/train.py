@@ -54,7 +54,7 @@ class CustomModelCheckpiont(ModelCheckpoint):
         # Export the model to TorchScript
         example_input = torch.randn(1, 3, 224, 224)  # Example input for tracing
         try:
-            # model_torch = copy.deepcopy(trainer.model)
+            model_torch = copy.deepcopy(trainer.model)
             torchscript_model = model_torch.to_torchscript(method="trace", example_inputs=example_input)
 
             # Save the TorchScript model
