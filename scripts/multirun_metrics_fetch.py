@@ -241,6 +241,7 @@ def main_run():
 
     # Step 2: Copy keep_file_path_pt into gradio_demo/model_storage/
     try:
+        shutil.copy('best_model_checkpoint.txt', model_storage_dir)
         shutil.copy(keep_file_path_pt, model_storage_dir)
         print(f"Copied {keep_file_path_pt} to {model_storage_dir}")
     except Exception as e:

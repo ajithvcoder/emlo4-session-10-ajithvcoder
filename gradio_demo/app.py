@@ -5,7 +5,19 @@ from PIL import Image
 import os
 
 class CatDogClassifierGradio:
-    def __init__(self, model_path="model_storage/epoch-checkpoint_patch_size-8_embed_dim-128.pt"):
+    def __init__(self, best_model_path="model_storage/best_model_checkpoint.txt"):
+
+        # Initialize the variable to store the second line
+        model_path = ""
+
+        # Read the file and fetch the second line
+        with open(best_model_path, "r") as file:
+            lines = file.readlines()
+            if len(lines) > 1:  # Check if the file has at least two lines
+                model_path = lines[1].strip()  # Strip removes any trailing newline or spaces
+
+        # Print or use the second line as needed
+        print("model_path :", model_path)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # Load the traced model
         self.model = torch.jit.load(model_path, map_location=torch.device('cpu'))
