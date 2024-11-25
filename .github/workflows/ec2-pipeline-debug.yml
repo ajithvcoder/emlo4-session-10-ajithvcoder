@@ -102,6 +102,8 @@ jobs:
 
       - name: Verify EC2 Instance
         run: |
+          apt update && apt upgrade -y && apt install -y build-essential curl wget git vim unzip awscli zip tar software-properties-common ca-certificates apt-transport-https gnupg lsb-release
+
           echo "Checking instance information..."
           # Check if we're on EC2
           TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
@@ -124,6 +126,10 @@ jobs:
             apt-get update
             apt-get install -y awscli
           fi
+
+
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sh get-docker.sh
           
           # Get ECR login command and execute it
           $(aws ecr get-login --no-include-email --region ap-south-1)
@@ -131,8 +137,8 @@ jobs:
 
       - name: Install jq
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
+          apt-get update
+          apt-get install -y jq
 
         # Deployment on Huggingface
       - name: Install Gradio
