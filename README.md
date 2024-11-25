@@ -21,6 +21,21 @@ Individual Module Test Command
 pytest --cov-report term --cov=src/models/ tests/models/test_classifier.py
 pytest --cov-report term --cov=src/data_modules/ tests/models/test_datamodules.py  
 
+prepare gradio app
+Create a python script to trace/script the trained model and save it - done
+Create a Gradio app to serve the cat - done
+
+Deploy the app to Huggingface Spaces
+Add tracing and deployment step to github actions
+this will complete the entire CI/CD pipeline from testing code, creating docker image, training the model, evaluating the model to deploying the model
+
+hadnling python environment in codespaces - https://www.youtube.com/watch?v=VYSGjUa5sc4
+
+git clone https://huggingface.co/spaces/ajithvcoder/emlo4-session-10-ajithvcoder
+
+Todo:
+comment on workflow file and multirun file more so that we can know manythings
+
 ### Contents
 
 - [Requirements](#requirements)

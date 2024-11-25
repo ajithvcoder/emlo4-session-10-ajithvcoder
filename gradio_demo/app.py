@@ -7,11 +7,11 @@ import os
 class CatDogClassifierGradio:
     def __init__(self, model_path="model_storage/epoch-checkpoint_patch_size-8_embed_dim-128.pt"):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
         # Load the traced model
         self.model = torch.jit.load(model_path, map_location=torch.device('cpu'))
         self.model = self.model.to(self.device)
         self.model.eval()
+        # test comment
 
         # Define the same transforms used during training/testing
         self.transform = transforms.Compose([
@@ -57,7 +57,7 @@ demo = gr.Interface(
     inputs=gr.Image(),
     outputs=gr.Label(num_top_classes=2),
     title="Cat vs Dog Classifier",
-    description="Upload an image to classify whether it's a cat or a dog",
+    description="Upload an image to classify whether it's a cat or a dog \n Note: The model accuracy is around 55% only not trained well as its for testing ci/cd pipelines",
     examples=[
         ["examples/cat.jpg"],
         ["examples/dog.jpg"]

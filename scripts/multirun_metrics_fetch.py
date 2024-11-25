@@ -217,6 +217,34 @@ def main_run():
 
     print(f"Kept: \n{keep_file_path_ckpt} \n{keep_file_path_pt} ")
 
+    # For gradio deoployment
+    # Remove all files in demo/model_storage
+    # copy keep_file_path_pt into it
+    
+    # Variables
+    model_storage_dir = "gradio_demo/model_storage"
+
+    # Ensure the model_storage directory exists
+    os.makedirs(model_storage_dir, exist_ok=True)
+
+    # Step 1: Remove all files in gradio_demo/model_storage
+    for filename in os.listdir(model_storage_dir):
+        file_path = os.path.join(model_storage_dir, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)  # Remove file or symlink
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)  # Remove directory
+        except Exception as e:
+            print(f"Failed to delete {file_path}: {e}")
+
+    # Step 2: Copy keep_file_path_pt into gradio_demo/model_storage/
+    try:
+        shutil.copy(keep_file_path_pt, model_storage_dir)
+        print(f"Copied {keep_file_path_pt} to {model_storage_dir}")
+    except Exception as e:
+        print(f"Failed to copy {keep_file_path_pt} to {model_storage_dir}: {e}")
+    
 
 
 if __name__ == "__main__":
