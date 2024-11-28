@@ -207,31 +207,31 @@ jobs:
       - name: Train, test and report
         run: |
           cd /workspace
-          # mkdir -p model_storage
-          # dvc pull -r myremote
-          # dvc repro -f
+          mkdir -p model_storage
+          dvc pull -r myremote
+          dvc repro -f
 
-      # - name: Read best checkpoint file name
-      #   id: read_checkpoint
-      #   run: |
-      #     set +e
-      #     echo "checking workspace files"
-      #     ls -a /workspace/   || true
-      #     echo "checking workspace model_storage files"
-      #     ls -a /workspace/model_storage || true
-      #     echo "checking workspace gradio_demo files"
-      #     ls -a /workspace/gradio_demo || true
+      - name: Read best checkpoint file name
+        id: read_checkpoint
+        run: |
+          set +e
+          echo "checking workspace files"
+          ls -a /workspace/   || true
+          echo "checking workspace model_storage files"
+          ls -a /workspace/model_storage || true
+          echo "checking workspace gradio_demo files"
+          ls -a /workspace/gradio_demo || true
 
-      #     checkpoint_file=$(head -n 1 /workspace/model_storage/best_model_checkpoint.txt) || true
-      #     echo "CHECKPOINT_FILE=$checkpoint_file" >> $GITHUB_ENV
+          checkpoint_file=$(head -n 1 /workspace/model_storage/best_model_checkpoint.txt) || true
+          echo "CHECKPOINT_FILE=$checkpoint_file" >> $GITHUB_ENV
 
-      # - name: Upload checkpoint to S3
-      #   run: |
-      #     checkpoint_path="${{ env.CHECKPOINT_FILE }}"  # Use the checkpoint path from the file || true
-      #     bucket_name="mybucket-emlo-mumbai"  # Change to your S3 bucket name || true
-      #     s3_key="session-10-checkpoint/${{ needs.launch-runner.outputs.commit_id }}/$(basename "$checkpoint_path")" || true  # Define S3 key
-      #     echo "Uploading $checkpoint_path to s3://$bucket_name/$s3_key" || true
-      #     aws s3 cp "$checkpoint_path" "s3://$bucket_name/$s3_key" || true
+      - name: Upload checkpoint to S3
+        run: |
+          checkpoint_path="${{ env.CHECKPOINT_FILE }}"  # Use the checkpoint path from the file || true
+          bucket_name="mybucket-emlo-mumbai"  # Change to your S3 bucket name || true
+          s3_key="session-10-checkpoint/${{ needs.launch-runner.outputs.commit_id }}/$(basename "$checkpoint_path")" || true  # Define S3 key
+          echo "Uploading $checkpoint_path to s3://$bucket_name/$s3_key" || true
+          aws s3 cp "$checkpoint_path" "s3://$bucket_name/$s3_key" || true
 
 
         # Deployment on Huggingface
