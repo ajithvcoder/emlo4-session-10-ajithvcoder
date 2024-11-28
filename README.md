@@ -6,13 +6,13 @@
 
 - [Requirements](#requirements)
 - [Development Method](#development-method)
-    - [Refer-session-08-readme](refer-session-08-readme)
-    - [Multirun personalization](#Multirun personalization and report generation)
-    - [Run AWS works manually for testing]
-    - [Github Actions Pipeline]
-    - [Building ECR image for development]
-    - [Using CML to trigger EC2 spot instance]
-    - [Gradio Deployment](#run-aws-works-manually-for-testing)
+    - [Refer-session-08-readme](#refer-session-08-readme)
+    - [Multirun personalization](#multirun-personalization-and-report-generation)
+    - [Run AWS works manually for testing](#run-aws-works-manually-for-testing)
+    - [Github Actions Pipeline](#github-actions-pipeline)
+    - [Building ECR image for development](#building-ecr-image-for-development)
+    - [Using CML to trigger EC2 spot instance](#using-cml-to-trigger-ec2-spot-instance)
+    - [Gradio Deployment](#gradio-deployment)
 - [Learnings](#learnings)
 - [Results Screenshots](#results-screenshots)
 
@@ -28,7 +28,7 @@ CI/CD to Deploy the Cat-Dog/ Dog-Breed Classifier as Gradio App to Huggingface S
 
 ### Development Method
 
-#### Build Command
+### Build Command
 
 **GPU Usage**
 
@@ -70,13 +70,13 @@ Individual Module Test Sample Command
 
 ```dvc repro -f```
 
-#### Refer-session-08-readme
+### Refer-session-08-readme
 
  - This assignment was build on top of [session-08 AWS Crash course](https://github.com/ajithvcoder/emlo4-session-08-ajithvcoder) so for complete development of **AWS ECR pipeline, cml development, dvc pipeline, storage of best checkpoint in AWS S3** you can refer [here](https://github.com/ajithvcoder/emlo4-session-08-ajithvcoder)
 
 
 
-#### Multirun personalization and report generation
+### Multirun personalization and report generation
 
 **In multirun scenario we can't give a generic checkpoint name for gradio**
 
@@ -87,7 +87,7 @@ Individual Module Test Sample Command
 - `python scripts/multirun_metrics_fetch.py` will fetch the necessary files needed for report and log table and plots to report.md. Moreover it also creates a file `best_model_checkpoint.txt` which holds the **optimized configs checkpoint model**
 - From `best_model_checkpoint.txt` use the file name in it and move to S3 using terminal commands in github actions
 
-#### Run AWS works manually for testing
+### Run AWS works manually for testing
 
 Do all these things manually first to understand the flow 
 - Connect vscode to ec2 instance 
@@ -105,7 +105,7 @@ Do these manually
 - TODO - Blogs to write
     - Connect to a private ECR repo and download image automatically and run a job with with github services and without using aws-cli-tool
 
-#### Github Actions Pipeline
+### Github Actions Pipeline
 
 - setup cml, uv packages using github actions and install `python=3.12`
 - Create AWS User keys and copy the contents of `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and store in github reprository secrets with variable name `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
@@ -124,16 +124,7 @@ Do these manually
 
 
 
-#### Learnings
-
-- Make sure in **Spot Requests** everything is turned off because with some settings ttl of 35 days + some other setting it was not turning off and restarting the ec2 instance even if i turn off manually.
-
-- I was supposed to provide absolute path for all the files in `train-deploy` job and i found the reason that the `--work-dir` was forced by github internally. There is a open issue also [docker-workdir-github-issue](https://github.com/actions/runner/issues/878)
-
-- Was not able to fetch private repo from AWS ECR and faced lot of credential failure issue . Used these references [aws-reference](https://github.com/aws-actions/amazon-ecr-login?tab=readme-ov-file#docker-credentials) , [stack-over-flow-question](https://stackoverflow.com/questions/72900118/github-actions-using-a-container-from-a-private-docker-registry-that-is-behind)
- 
-
-#### Building ECR image for development
+### Building ECR image for development
 
 **Refer workflow/ec2-pipeline.yml**
 
@@ -146,7 +137,7 @@ Do these manually
 - Get the latest commit id and store it as environment variable
 - Use `docker-build` and `docker-push` to build and push in github actions
 
-#### Using CML to trigger EC2 spot instance
+### Using CML to trigger EC2 spot instance
 
 **Refer workflow/ec2-pipeline.yml**
 - Use `iterative/setup-cml@v2` to launch cml runner
@@ -154,7 +145,7 @@ Do these manually
 
 - From best_checkpoint.txt file your can get the best checkpoint file name and it being transfered from model_storage folder to `mybucket-emlo-mumbai/session-10-checkpoint` in S3 by having a folder named with commit id in it. Also its copied to gradio_demo/model_storage and its commited to hugging face spaces
 
-#### Gradio Deployment
+### Gradio Deployment
 
 - `python -c 'import huggingface_hub; huggingface_hub.login(token="${{ secrets.hf_token }}")'`
 
@@ -167,6 +158,15 @@ Do these manually
 - Use `map_location=self.device` to set the compute device
 
 - Use `.gitattributes` to set the git-lfs
+
+### Learnings
+
+- Make sure in **Spot Requests** everything is turned off because with some settings ttl of 35 days + some other setting it was not turning off and restarting the ec2 instance even if i turn off manually.
+
+- I was supposed to provide absolute path for all the files in `train-deploy` job and i found the reason that the `--work-dir` was forced by github internally. There is a open issue also [docker-workdir-github-issue](https://github.com/actions/runner/issues/878)
+
+- Was not able to fetch private repo from AWS ECR and faced lot of credential failure issue . Used these references [aws-reference](https://github.com/aws-actions/amazon-ecr-login?tab=readme-ov-file#docker-credentials) , [stack-over-flow-question](https://stackoverflow.com/questions/72900118/github-actions-using-a-container-from-a-private-docker-registry-that-is-behind)
+ 
 
 ### Results Screenshots
 
