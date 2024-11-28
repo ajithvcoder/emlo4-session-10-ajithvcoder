@@ -20,7 +20,7 @@ class CatDogClassifierGradio:
         print("model_path :", model_path)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # Load the traced model
-        self.model = torch.jit.load(model_path, map_location=torch.device('cpu'))
+        self.model = torch.jit.load(model_path, map_location=self.device)
         self.model = self.model.to(self.device)
         self.model.eval()
         # test comment
