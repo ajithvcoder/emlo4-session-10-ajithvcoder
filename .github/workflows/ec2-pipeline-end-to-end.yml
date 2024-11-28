@@ -58,6 +58,8 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          # Use below command if above set-output is deprecated - TODO: Check if its saving the name properly
+          # echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   launch-runner:
     runs-on: ubuntu-latest
@@ -203,31 +205,31 @@ jobs:
       - name: Train, test and report
         run: |
           cd /workspace
-          mkdir -p model_storage
-          dvc pull -r myremote
-          dvc repro -f
+          # mkdir -p model_storage
+          # dvc pull -r myremote
+          # dvc repro -f
 
-      - name: Read best checkpoint file name
-        id: read_checkpoint
-        run: |
-          set +e
-          echo "checking workspace files"
-          ls -a /workspace/   || true
-          echo "checking workspace model_storage files"
-          ls -a /workspace/model_storage || true
-          echo "checking workspace gradio_demo files"
-          ls -a /workspace/gradio_demo || true
+      # - name: Read best checkpoint file name
+      #   id: read_checkpoint
+      #   run: |
+      #     set +e
+      #     echo "checking workspace files"
+      #     ls -a /workspace/   || true
+      #     echo "checking workspace model_storage files"
+      #     ls -a /workspace/model_storage || true
+      #     echo "checking workspace gradio_demo files"
+      #     ls -a /workspace/gradio_demo || true
 
-          checkpoint_file=$(head -n 1 /workspace/model_storage/best_model_checkpoint.txt) || true
-          echo "CHECKPOINT_FILE=$checkpoint_file" >> $GITHUB_ENV
+      #     checkpoint_file=$(head -n 1 /workspace/model_storage/best_model_checkpoint.txt) || true
+      #     echo "CHECKPOINT_FILE=$checkpoint_file" >> $GITHUB_ENV
 
-      - name: Upload checkpoint to S3
-        run: |
-          checkpoint_path="${{ env.CHECKPOINT_FILE }}"  # Use the checkpoint path from the file || true
-          bucket_name="mybucket-emlo-mumbai"  # Change to your S3 bucket name || true
-          s3_key="session-10-checkpoint/${{ needs.launch-runner.outputs.commit_id }}/$(basename "$checkpoint_path")" || true  # Define S3 key
-          echo "Uploading $checkpoint_path to s3://$bucket_name/$s3_key" || true
-          aws s3 cp "$checkpoint_path" "s3://$bucket_name/$s3_key" || true
+      # - name: Upload checkpoint to S3
+      #   run: |
+      #     checkpoint_path="${{ env.CHECKPOINT_FILE }}"  # Use the checkpoint path from the file || true
+      #     bucket_name="mybucket-emlo-mumbai"  # Change to your S3 bucket name || true
+      #     s3_key="session-10-checkpoint/${{ needs.launch-runner.outputs.commit_id }}/$(basename "$checkpoint_path")" || true  # Define S3 key
+      #     echo "Uploading $checkpoint_path to s3://$bucket_name/$s3_key" || true
+      #     aws s3 cp "$checkpoint_path" "s3://$bucket_name/$s3_key" || true
 
 
         # Deployment on Huggingface
@@ -240,11 +242,13 @@ jobs:
           python3 --version || true
 
       - name: Log in to Hugging Face
-        run: python -c 'import huggingface_hub; huggingface_hub.login(token="${{ secrets.hf_token }}")' || true
+        run: python -c 'import huggingface_hub; huggingface_hub.login(token="${{ secrets.HF_TOKEN }}")' || true
 
       - name: Deploy to Huggingface Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          gradio deploy || true
+          gradio deploy --title "emlo4-session-10-ajithvcoder" || true
 
         # https://cml.dev/doc/self-hosted-runners#gitlab-ciyml
         # --cloud-gpu={nogpu,k80,v100,tesla}
