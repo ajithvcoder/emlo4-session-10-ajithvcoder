@@ -255,6 +255,8 @@ jobs:
           ls -a /workspace/gradio_demo || true
           echo "checking workspace curr files"
           ls -a ./ || true
+          echo "checking workspace model storage files"
+          ls -a /workspace/gradio_demo/model_storage || true
           gradio deploy --title "emlo4-session-10-ajithvcoder" --app-file /workspace/gradio_demo/app.py || true
 
         # https://cml.dev/doc/self-hosted-runners#gitlab-ciyml
