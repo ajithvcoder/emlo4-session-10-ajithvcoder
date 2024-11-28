@@ -175,14 +175,23 @@ jobs:
           bash .venv/bin/activate || true
           python --version || true
           python3 --version || true
-          pip3 install -r requirements.txt
+          touch requirements.txt
+          echo "--extra-index-url https://download.pytorch.org/whl/cpu" > requirements.txt
+          echo "gradio" >> requirements.txt
+          echo "torch==2.4.1+cpu" >> requirements.txt
+          echo "torchvision==0.19.1+cpu" >> requirements.txt
+          echo "pillow==11.0.0" >> requirements.txt
+          echo "huggingface_hub==0.26.2" >> requirements.txt
+          uv pip install -r requirements.txt --system || true
+          uv pip3 install -r requirements.txt  || true
           # python3 -m pip install -r requirements.txt
 
       - name: Log in to Hugging Face
-        run: python -c 'import huggingface_hub; huggingface_hub.login(token="${{ secrets.hf_token }}")'
+        run: uv run python -c 'import huggingface_hub; huggingface_hub.login(token="${{ secrets.hf_token }}")'
 
       - name: Deploy to Spaces
-        run: gradio deploy
+        run: | 
+          uv run gradio deploy || true
 
         # https://cml.dev/doc/self-hosted-runners#gitlab-ciyml
         # --cloud-gpu={nogpu,k80,v100,tesla}
