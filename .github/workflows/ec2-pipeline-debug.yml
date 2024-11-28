@@ -101,6 +101,7 @@ jobs:
     # runs-on: ubuntu-latest
     steps:
 
+
       - name: Verify EC2 Instance
         run: |
           DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y && apt install -y curl wget git unzip zip tar lsb-release
@@ -148,6 +149,24 @@ jobs:
           # aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 306093656765.dkr.ecr.ap-south-1.amazonaws.com
           # aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 306093656765.dkr.ecr.ap-south-1.amazonaws.com
 
+      - name: Set up AWS CLI credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-south-1  # Change to your desired region
+        run: |
+          # Create the AWS config and credentials files
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/config
+          echo "region=${AWS_DEFAULT_REGION}" >> ~/.aws/config
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
+
+          aws s3 ls || true
+          aws sts get-caller-identity || true
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 306093656765.dkr.ecr.ap-south-1.amazonaws.com || true
+
       - name: Install jq
         run: |
           apt-get update
@@ -182,16 +201,16 @@ jobs:
           echo "torchvision==0.19.1+cpu" >> requirements.txt
           echo "pillow==11.0.0" >> requirements.txt
           echo "huggingface_hub==0.26.2" >> requirements.txt
-          uv pip install -r requirements.txt --system || true
-          uv pip3 install -r requirements.txt  || true
+          pip install -r requirements.txt || true
+          # uv pip install -r requirements.txt  || true
           # python3 -m pip install -r requirements.txt
 
       - name: Log in to Hugging Face
-        run: uv run python -c 'import huggingface_hub; huggingface_hub.login(token="${{ secrets.hf_token }}")'
+        run: python -c 'import huggingface_hub; huggingface_hub.login(token="${{ secrets.hf_token }}")' || true
 
       - name: Deploy to Spaces
         run: | 
-          uv run gradio deploy || true
+          gradio deploy || true
 
         # https://cml.dev/doc/self-hosted-runners#gitlab-ciyml
         # --cloud-gpu={nogpu,k80,v100,tesla}
