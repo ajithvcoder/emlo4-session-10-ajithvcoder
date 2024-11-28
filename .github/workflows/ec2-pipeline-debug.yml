@@ -1,4 +1,4 @@
-name: CI-CD-Compelete-Deployment-Gradio-Debug
+name: Stale-CI-CD-Compelete-Deployment-Gradio-Debug
 on: 
   workflow_dispatch:
 jobs:

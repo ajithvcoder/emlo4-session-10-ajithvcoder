@@ -1,4 +1,4 @@
-name: CI-CD-Compelete-Deployment
+name: Stale-CI-CD-Compelete-Deployment
 on: 
   workflow_dispatch:
 jobs:

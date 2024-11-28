@@ -1,4 +1,4 @@
-name: Github-Commit-Transfer
+name: Stale-Github-Commit-Transfer
 on: 
   workflow_dispatch:
 jobs:

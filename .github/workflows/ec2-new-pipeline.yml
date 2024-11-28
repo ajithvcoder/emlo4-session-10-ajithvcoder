@@ -1,4 +1,4 @@
-name: New-CML-EC2-Runner
+name: Stale-New-CML-EC2-Runner
 on: 
   workflow_dispatch:
 

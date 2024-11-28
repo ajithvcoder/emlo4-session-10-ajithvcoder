@@ -1,4 +1,4 @@
-name: ML Training and artifact generation Workflow with DHCR
+name: Stale-ML Training and artifact generation Workflow with DHCR
 
 # on:
 #   push:

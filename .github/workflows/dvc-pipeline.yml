@@ -1,4 +1,4 @@
-name: HparamSearch, Train Test, Infer and Report
+name: Stale-HparamSearch, Train Test, Infer and Report
 on:
   workflow_call:
   workflow_dispatch:

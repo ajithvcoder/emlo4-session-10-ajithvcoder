@@ -155,6 +155,15 @@ jobs:
           whoami
           pwd
 
+          echo "checking files"
+          ls -d /__w/emlo4-session-10-ajithvcoder/emlo4-session-10-ajithvcoder/* || true
+
+          echo "checking files 2"
+          ls -a /__w/emlo4-session-10-ajithvcoder/emlo4-session-10-ajithvcoder || true
+          
+          echo "checking files 2"
+          ls -a /workspace || true
+
           # Docker installation inside a docker container
           # curl -fsSL https://get.docker.com -o get-docker.sh
           # sh get-docker.sh
@@ -193,6 +202,7 @@ jobs:
         # For dvc pull from aws s3 remote we need aws credentails so i have used env variable to set it in container creation job
       - name: Train, test and report
         run: |
+          cd /workspace
           mkdir -p model_storage
           dvc pull -r myremote
           dvc repro -f

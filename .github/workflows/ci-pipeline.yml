@@ -1,6 +1,6 @@
 # .github/workflows/ci-pipeline.yml
 
-name: CI Pipeline
+name: Stale-CI Pipeline
 
 on:
   workflow_dispatch:
