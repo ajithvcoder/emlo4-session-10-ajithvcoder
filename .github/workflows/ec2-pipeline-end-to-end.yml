@@ -248,7 +248,12 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          gradio deploy --title "emlo4-session-10-ajithvcoder" || true
+          cd /workspace/gradio_demo/ || true
+          echo "checking workspace gradio_demo files"
+          ls -a /workspace/gradio_demo || true
+          echo "checking workspace curr files"
+          ls -a ./ || true
+          gradio deploy --title "emlo4-session-10-ajithvcoder" --app-file /workspace/gradio_demo/app.py || true
 
         # https://cml.dev/doc/self-hosted-runners#gitlab-ciyml
         # --cloud-gpu={nogpu,k80,v100,tesla}
