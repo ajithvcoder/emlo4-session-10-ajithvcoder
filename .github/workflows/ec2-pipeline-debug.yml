@@ -86,7 +86,8 @@ jobs:
           --cloud-spot \
           --single \
           --labels=cml-gpu \
-          --idle-timeout=100 
+          --idle-timeout=100 \
+          --cloud-gpu=nvidia-tesla-t4
 
   train-and-deploy:
     runs-on: [self-hosted, cml-gpu]
@@ -107,7 +108,8 @@ jobs:
           unzip awscliv2.zip
           ./aws/install -i ~/aws-cli -b ~/aws-cli/bin
           export PATH=/github/home/aws-cli/bin:$PATH
-          aws help
+          apt-get install groff
+          aws --version
 
           echo "Checking instance information..."
           # Check if we're on EC2
@@ -172,5 +174,8 @@ jobs:
 
       - name: Deploy to Spaces
         run: gradio deploy
+
+        # https://cml.dev/doc/self-hosted-runners#gitlab-ciyml
+        # --cloud-gpu={nogpu,k80,v100,tesla}
 
 
