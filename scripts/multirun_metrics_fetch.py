@@ -175,15 +175,15 @@ def main_run():
         f.write("\n")
         f.write(hparams_content)
     
-    with open('best_model_checkpoint.txt', 'w') as f:
-        f.write(f"./model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.ckpt\n")
-        f.write(f"./model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.pt")
+    with open('/workspace/best_model_checkpoint.txt', 'w') as f:
+        f.write(f"/workspace/model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.ckpt\n")
+        f.write(f"/workspace/model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.pt")
 
     import shutil
 
     # Define the source file and destination folder
-    source_file = 'best_model_checkpoint.txt'
-    destination_folder = 'model_storage/'
+    source_file = '/workspace/best_model_checkpoint.txt'
+    destination_folder = '/workspace/model_storage/'
 
     # Copy the file to the destination folder
     shutil.copy(source_file, destination_folder)
@@ -192,8 +192,8 @@ def main_run():
 
 
     # Define the path to the checkpoint file and folder containing .ckpt files
-    checkpoint_file = 'best_model_checkpoint.txt'
-    checkpoint_folder = 'model_storage'
+    checkpoint_file = '/workspace/best_model_checkpoint.txt'
+    checkpoint_folder = '/workspace/model_storage'
 
     # Read the first line of the checkpoint file to get the file to keep
     with open(checkpoint_file, 'r') as f:
@@ -223,7 +223,7 @@ def main_run():
     # copy keep_file_path_pt into it
     
     # Variables
-    model_storage_dir = "gradio_demo/model_storage"
+    model_storage_dir = "/workspace/gradio_demo/model_storage"
 
     # Ensure the model_storage directory exists
     os.makedirs(model_storage_dir, exist_ok=True)
@@ -241,7 +241,7 @@ def main_run():
 
     # Step 2: Copy keep_file_path_pt into gradio_demo/model_storage/
     try:
-        shutil.copy('best_model_checkpoint.txt', model_storage_dir)
+        shutil.copy('/workspace/best_model_checkpoint.txt', model_storage_dir)
         shutil.copy(keep_file_path_pt, model_storage_dir)
         print(f"Copied {keep_file_path_pt} to {model_storage_dir}")
     except Exception as e:

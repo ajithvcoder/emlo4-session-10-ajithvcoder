@@ -110,7 +110,7 @@ jobs:
       # public registry : public.ecr.aws/s5u6u2t2/ajithvcoder/emlo-session-10-image
       image: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/emlo-session-10-image
       # image: docker://pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
-      options: --gpus all
+      options: --gpus all --workdir /workspace
       credentials:
           username: ${{ needs.build-and-push-ecr-image.outputs.docker_username }}
           password: ${{ needs.build-and-push-ecr-image.outputs.docker_password }}
@@ -120,6 +120,8 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
         DOCKER_AUTH_CONFIG: ${{ secrets.DOCKER_AUTH_CONFIG }}
         REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        WORKDIR: /workspace
+
     # runs-on: ubuntu-latest
     steps:
       - name: Verify EC2 Instance
