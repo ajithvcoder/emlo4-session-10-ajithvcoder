@@ -90,7 +90,7 @@ jobs:
           --cloud-gpu=nvidia-tesla-t4
 
   train-and-deploy:
-    runs-on: [self-hosted, cml-gpu]
+    runs-on: [cml-gpu]
     needs: launch-runner
     outputs:
       commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
@@ -170,8 +170,9 @@ jobs:
 
           uv python install 3.12
           uv venv --python 3.12.0
-          source .venv/bin/activate
-          python --version
+          bash .venv/bin/activate
+          python --version || true
+          python3 --version || true
           pip3 install -r requirements.txt
           # python3 -m pip install -r requirements.txt
 
@@ -183,5 +184,5 @@ jobs:
 
         # https://cml.dev/doc/self-hosted-runners#gitlab-ciyml
         # --cloud-gpu={nogpu,k80,v100,tesla}
-
+        # TODO: aws cli configuration "aws sts get-caller-identity" in docker
 
