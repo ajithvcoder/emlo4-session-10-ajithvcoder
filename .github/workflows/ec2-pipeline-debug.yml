@@ -3,59 +3,66 @@ on:
   workflow_dispatch:
 jobs:
 
-  # build-and-push-ecr-image:
-  #   name: Build and push ECR image
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     commit_id: ${{ steps.get_commit_id.outputs.commit_id }}
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+  build-and-push-ecr-image:
+    name: Build and push ECR image
+    runs-on: ubuntu-latest
+    outputs:
+      commit_id: ${{ steps.get_commit_id.outputs.commit_id }}
+      registry: ${{ steps.login-ecr.outputs.registry }}
+      docker_username: ${{ steps.login-ecr.outputs.docker_username_306093656765_dkr_ecr_ap_south_1_amazonaws_com }} # More information on these outputs can be found below in the 'Docker Credentials' section
+      docker_password: ${{ steps.login-ecr.outputs.docker_password_306093656765_dkr_ecr_ap_south_1_amazonaws_com }}
 
-  #     - name: Install Utilities
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y jq unzip
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v1
+      - name: Install Utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-  #     - name: Get latest commit ID
-  #       id: get_commit_id
-  #       run: |
-  #         latest_commit=$(git rev-parse HEAD)
-  #         echo "::set-output name=commit_id::$latest_commit"
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'false'
+
+      - name: Get latest commit ID
+        id: get_commit_id
+        run: |
+          latest_commit=$(git rev-parse HEAD)
+          echo "::set-output name=commit_id::$latest_commit"
 
 
-  #     - name: Display the commit ID
-  #       run: |
-  #         echo "Latest commit ID is: ${{ steps.get_commit_id.outputs.commit_id }}"
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ steps.get_commit_id.outputs.commit_id }}"
 
 
-  #     - name: Build, tag, and push image to Amazon ECR
-  #       id: build-image
-  #       env:
-  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-  #         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
-  #         IMAGE_TAG: latest
-  #       run: |
-  #         # Build a docker container and
-  #         # push it to ECR so that it can
-  #         # be deployed to ECS.
-  #         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-  #         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  #         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
 
   launch-runner:
     runs-on: ubuntu-latest
-    # needs: build-and-push-ecr-image
+    needs: build-and-push-ecr-image
     outputs:
       commit_id: ${{ steps.get_commit_id_runner.outputs.commit_id }}
     steps:
@@ -92,22 +99,26 @@ jobs:
 
   train-and-deploy:
     runs-on: [cml-gpu]
-    needs: launch-runner
+    needs: [build-and-push-ecr-image, launch-runner]
     outputs:
       commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
     timeout-minutes: 20
     
     container:
+      # Note private registery 
+      # public registry : public.ecr.aws/s5u6u2t2/ajithvcoder/emlo-session-10-image
       image: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/emlo-session-10-image
       # image: docker://pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
       options: --gpus all
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      DOCKER_AUTH_CONFIG: ${{ secrets.DOCKER_AUTH_CONFIG }}
-      REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      credentials:
+          username: ${{ needs.build-and-push-ecr-image.outputs.docker_username }}
+          password: ${{ needs.build-and-push-ecr-image.outputs.docker_password }}
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        DOCKER_AUTH_CONFIG: ${{ secrets.DOCKER_AUTH_CONFIG }}
+        REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     # runs-on: ubuntu-latest
     steps:
 
