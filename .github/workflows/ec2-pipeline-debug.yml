@@ -108,7 +108,7 @@ jobs:
           unzip awscliv2.zip
           ./aws/install -i ~/aws-cli -b ~/aws-cli/bin
           export PATH=/github/home/aws-cli/bin:$PATH
-          apt-get install groff
+          apt-get install -y groff
           aws --version
 
           echo "Checking instance information..."
