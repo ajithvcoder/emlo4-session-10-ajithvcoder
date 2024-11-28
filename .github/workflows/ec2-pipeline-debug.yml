@@ -95,9 +95,16 @@ jobs:
     outputs:
       commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
     timeout-minutes: 20
+    
     container:
-      image: docker://pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
+      image: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/emlo-session-10-image
+      # image: docker://pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
       options: --gpus all
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     # runs-on: ubuntu-latest
     steps:
 
@@ -111,6 +118,11 @@ jobs:
           export PATH=/github/home/aws-cli/bin:$PATH
           apt-get install -y groff
           aws --version
+
+          echo "check folder information..."
+          ls -l /github/home/ || true
+          ls /github/home/  || true
+          
 
           echo "Checking instance information..."
           # Check if we're on EC2
@@ -162,7 +174,7 @@ jobs:
           echo "[default]" > ~/.aws/credentials
           echo "aws_access_key_id=${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
           echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
-
+          export PATH=/github/home/aws-cli/bin:$PATH
           aws s3 ls || true
           aws sts get-caller-identity || true
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 306093656765.dkr.ecr.ap-south-1.amazonaws.com || true
