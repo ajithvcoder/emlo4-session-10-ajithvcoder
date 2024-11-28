@@ -176,8 +176,8 @@ def main_run():
         f.write(hparams_content)
     
     with open('/workspace/best_model_checkpoint.txt', 'w') as f:
-        f.write(f"/workspace/model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.ckpt\n")
-        f.write(f"/workspace/model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.pt")
+        f.write(f"./model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.ckpt\n")
+        f.write(f"./model_storage/epoch-checkpoint_patch_size-{hparams_data['best_params']['model.patch_size']}_embed_dim-{hparams_data['best_params']['model.embed_dim']}.pt")
 
     import shutil
 
