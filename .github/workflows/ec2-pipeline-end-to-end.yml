@@ -233,7 +233,7 @@ jobs:
         # Deployment on Huggingface
       - name: Deployment on Huggingface
         run: |
-          cd gradio_demo/
+          cd /workspace/gradio_demo/ || true
 
           
           python --version || true
